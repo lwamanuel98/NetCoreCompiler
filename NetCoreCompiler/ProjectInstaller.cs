@@ -32,7 +32,8 @@ namespace NetCoreCompiler
                 .AppendParameter(Context.Parameters["BuildDirectory"])
                 .AppendParameter(Context.Parameters["WebsiteName"])
                 .AppendParameter(Context.Parameters["PoolName"])
-                .AppendParameter(Context.Parameters["ApplicationPath"]);
+                .AppendParameter(Context.Parameters["ApplicationPath"])
+                .AppendParameter(Context.Parameters["DestinationDirectory"]);
 
             Program.logToFile("Assembly Path: " + Context.Parameters["assemblypath"]);
 

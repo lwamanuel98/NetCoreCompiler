@@ -65,3 +65,6 @@ Optional Parameters:
 
  - /ApplicationPath
 		The path of the application. The default is '/'. If the website to be affected runs under a sub-application; specify the path here. '/' being the root application.
+		
+ - /DestinationDirectory
+		The path to store the built files. This folder should have permissions for the website. Switch folders will be created here. By default temporary storage is used (Recommended to set this parameter)

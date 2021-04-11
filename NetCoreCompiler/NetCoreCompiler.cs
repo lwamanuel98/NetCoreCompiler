@@ -15,100 +15,11 @@ namespace NetCoreCompiler
 {
     public partial class NetCoreCompiler : ServiceBase
     {
-        public static string WebsiteTemp
-        {
-            get
-            {
-                string dir = Path.Combine(TempDirectory, Program.WEBSITE_NAME);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                return dir;
-            }
-        }
-        public static string SettingsFile
-        {
-            get
-            {
-                return Path.Combine(WebsiteTemp, "ncc.settings");
-            }
-        }
-        public static string TempDirectory
-        {
-            get
-            {
-                string dir = Path.Combine(Path.GetTempPath(), "netCoreCompiler");
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                return dir;
-            }
-        }
         FileSystemWatcher watcher = null;
         public NetCoreCompiler()
         {
             InitializeComponent();
         }
-
-        public static Dictionary<string, string> Settings
-        {
-            get
-            {
-                if (File.Exists(SettingsFile))
-                {
-                    using (StreamReader sr = new StreamReader(File.OpenRead(SettingsFile)))
-                    {
-                        return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(sr.ReadToEnd());
-                    }
-                }
-                else
-                {
-                    Dictionary<string, string> defaults = new Dictionary<string, string>();
-                    defaults.Add("current_switch", "0");
-                    defaults.Add("switch_folder_0", "www");
-                    defaults.Add("switch_folder_1", "www1");
-
-                    File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
-
-                    return defaults;
-                }
-            }
-            set
-            {
-
-                Dictionary<string, string> defaults = value;
-
-                File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
-            }
-        }
-        public static int CurrentSwitch
-        {
-            get
-            {
-                return int.Parse(Settings["current_switch"]);
-            }
-            set
-            {
-                Dictionary<string, string> settings = Settings;
-                settings["current_switch"] = value.ToString();
-                Settings = settings;
-            }
-        }
-        public static string CurrentSwitchFolder
-        {
-            get
-            {
-                return Path.Combine(WebsiteTemp, Settings["switch_folder_" + CurrentSwitch]);
-            }
-        }
-
-        public void NextSwitchFolder()
-        {
-            if (CurrentSwitch == 0)
-                CurrentSwitch = 1;
-            else if (CurrentSwitch == 1)
-                CurrentSwitch = 0;
-        }
-
-
 
         protected override void OnStart(string[] args)
         {
@@ -123,6 +34,9 @@ namespace NetCoreCompiler
                     Program.POOL_NAME = args[3];
                 if (args[4] != "")
                     Program.APPLICATION_PATH = args[4];
+                if(args[5] != "")
+                    Program.DEST_DIRECTORY = args[5];
+
 
                 if (Program.POOL_NAME == "")
                     Program.POOL_NAME = Program.WEBSITE_NAME;
@@ -251,11 +165,11 @@ namespace NetCoreCompiler
                 if (appPool == null)
                     return;
 
-                string oldSwitchFolder = CurrentSwitchFolder;
+                string oldSwitchFolder = Program.CurrentSwitchFolder;
 
-                NextSwitchFolder();
+                Program.NextSwitchFolder();
 
-                string buildFolder = CurrentSwitchFolder;
+                string buildFolder = Program.CurrentSwitchFolder;
 
 
                 Program.logToFile("Building project to: (" + buildFolder + ")...");
@@ -273,15 +187,20 @@ namespace NetCoreCompiler
 
                 Program.logToFile("Running iis reset...");
 
+
+                // stop
                 appPool.Stop();
 
+                // wait until stopped
                 while (appPool.State != ObjectState.Stopped)
                 {
+                    // re get state
                     appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(Program.POOL_NAME));
                     if (appPool == null)
                         return;
                 }
 
+                // start again
                 appPool.Start();
 
                 Program.logToFile(result);

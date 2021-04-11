@@ -27,9 +27,11 @@ Locate all website source files within the '/private/src' folder.
 
 Notes:
 
-The IIS website should be setup, the physical path does not matter as the compiler will build the files to a directory that the website will be updated to point to. In order to reduce downtime, the website will use two switch folders that can be configured via: C:\Windows\Temp\netCoreCompiler\ncc.settings
+The IIS website should be setup, the physical path does not matter as the compiler will build the files to a directory and will update the physical path in IIS automatically (In future releases, this feature will be "disable-able"). In order to reduce downtime, the website will use two switch folders that can be configured via: C:\Windows\Temp\netCoreCompiler\ncc.settings
 
-Each rebuild will switch between the two folder to minimise the downtime of websites (In future releases, this feature will be "disable-able")
+Each rebuild will switch between the two (or more) folders to minimise the downtime of websites (In future releases, this feature will be "disable-able")
+
+There should only be a maximum downtime of up to 10 seconds using this tool. The capability to add more switch folders (to prevent file locking from older processes being an issue) will be added soon, this feature should remove any down time during building.
 
 Using C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe you can install the service to a windows server/machine.
 

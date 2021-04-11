@@ -1,7 +1,7 @@
 ------------------
 NET CORE Compiler
 ------------------
-This is a windows service that compiles source files of a .NET Core web application on the fly and publish a build to a web server. This application currently switches between two directoroies to minimise website downtime and automatically updates IIS.
+This is a windows service that compiles source files of a .NET Core web application on the fly and publishes a build to a destination folder. This application also update's a specified IIS website to the new deployment folder. Switches between two deployment directories to minimise website downtime and automatically updates IIS website and app pool settings, using an existing setup within IIS.
 
 Please ensure that the Website name and pool name specified match an existing setup in IIS. This tool does not support remote deployment.
 
@@ -67,18 +67,18 @@ Required parameters:
 		This should be the exact match to the IIS Website name that will be manipulated on the web server.
 		
  - /BuildDirectory
-		Tbe source directory that will be watched for changes. This should contain the project solution in the root.
+		Source directory that will be watched for changes. This should contain the project solution in the root.
 		
 Optional Parameters:
 
  - /PoolName
-		The name of application pool that will be affected when updating the IIS website. If this is not specified, it will default to the Website Name. Please ensure that this is correct!
+		Name of application pool that will be affected when updating the IIS website. If this is not specified, it will default to the Website Name. Please ensure that this is correct!
 
  - /ApplicationPath
-		The path of the application. The default is '/'. If the website to be affected runs under a sub-application; specify the path here. '/' being the root application.
+		Path of the application. The default is '/'. If the website to be affected runs under a sub-application; specify the path here. '/' being the root application.
 		
  - /DestinationDirectory
-		The path to store the built files. This folder should have permissions for the website. Switch folders will be created here. By default temporary storage is used (Recommended to set this parameter)
+		Physical path to store the built files. This folder should have permissions for the website. Switch folders will be created here. By default temporary storage is used (Recommended to set this parameter)
 		
 
 ------------------

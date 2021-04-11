@@ -22,7 +22,8 @@ First, setup a website in IIS and create the folder structure as follows:
  - /private
  - /private/src
  - /www
-And locate all website source files within the '/private/src' folder.
+
+Locate all website source files within the '/private/src' folder.
 
 Notes:
 

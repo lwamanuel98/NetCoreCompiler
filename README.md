@@ -82,12 +82,11 @@ Sample
 
 Installation:
 
-C:\Windows\Microsoft.NET\Framework\v4.0.30319\SetupUtil.exe
-
-	/WebsiteName="TestWebsite" ### Required
-	/BuildDirectory="C:\wwwroot\TestWebsite\private\src" ### Required
-	/PoolName="TestWebsiteApplicationPool" ### (Optional) defaults to website name
-	/ApplicationPath="/" ### (Optional) defaults to '/'
-	/DestinationDirectory="C:\wwwroot\TestWebsite\www" ### (Optional) defaults to temporary storage
-	
-	C:/Users/Developer/Desktop/NetCoreCompiler.exe ### Dont forget to specify the service executable to run!
+	C:\Windows\Microsoft.NET\Framework\v4.0.30319\SetupUtil.exe
+		/WebsiteName="TestWebsite" ### Required
+		/BuildDirectory="C:\wwwroot\TestWebsite\private\src" ### Required
+		/PoolName="TestWebsiteApplicationPool" ### (Optional) defaults to website name
+		/ApplicationPath="/" ### (Optional) defaults to '/'
+		/DestinationDirectory="C:\wwwroot\TestWebsite\www" ### (Optional) defaults to temporary storage
+		
+		C:/Users/Developer/Desktop/NetCoreCompiler.exe ### Dont forget to specify the service executable to run!

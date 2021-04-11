@@ -15,10 +15,16 @@ You will also need .NET Framework 4 to install the service.
 ------------------
 Installation
 ------------------
+
+Recommendation (used in sample):
+
 First, setup a website in IIS and create the folder structure as follows:
  - /private
  - /private/src
+ - /www
 And locate all website source files within the '/private/src' folder.
+
+Notes:
 
 The IIS website should be setup, the physical path does not matter as the compiler will build the files to a directory that the website will be updated to point to. In order to reduce downtime, the website will use two switch folders that can be configured via: C:\Windows\Temp\netCoreCompiler\ncc.settings
 
@@ -68,3 +74,20 @@ Optional Parameters:
 		
  - /DestinationDirectory
 		The path to store the built files. This folder should have permissions for the website. Switch folders will be created here. By default temporary storage is used (Recommended to set this parameter)
+		
+
+------------------
+Sample
+------------------
+
+Installation:
+
+C:\Windows\Microsoft.NET\Framework\v4.0.30319\SetupUtil.exe
+
+	/WebsiteName="TestWebsite" ### Required
+	/BuildDirectory="C:\wwwroot\TestWebsite\private\src" ### Required
+	/PoolName="TestWebsiteApplicationPool" ### (Optional) defaults to website name
+	/ApplicationPath="/" ### (Optional) defaults to '/'
+	/DestinationDirectory="C:\wwwroot\TestWebsite\www" ### (Optional) defaults to temporary storage
+	
+	C:/Users/Developer/Desktop/NetCoreCompiler.exe ### Dont forget to specify the service executable to run!

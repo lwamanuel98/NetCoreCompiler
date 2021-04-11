@@ -1,7 +1,9 @@
 ------------------
 NET CORE Compiler
 ------------------
-This service is used to compile source of NET Core files on the fly and publish to web server.
+This service compiles source files of a .NET Core web application on the fly and publish a build to a web server. This application currently switches between two directoroies to minimise website downtime and automatically updates IIS.
+
+Please ensure that the Website name and pool name specified match an existing setup in IIS. This tool does not support remote deployment.
 
 Writen by: Luke Manuel
 

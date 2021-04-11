@@ -1,0 +1,146 @@
+﻿Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler...
+Creating EventLog source NetCoreCompiler in log Application...
+Rolling back assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Restoring event log to previous state for source NetCoreCompiler.
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler...
+Creating EventLog source NetCoreCompiler in log Application...
+Rolling back assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Restoring event log to previous state for source NetCoreCompiler.
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler...
+Creating EventLog source NetCoreCompiler in log Application...
+Rolling back assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Restoring event log to previous state for source NetCoreCompiler.
+Uninstalling assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Removing EventLog source NetCoreCompiler.
+Service NetCoreCompiler is being removed from the system...
+Service NetCoreCompiler was successfully removed from the system.
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler...
+Service NetCoreCompiler has been successfully installed.
+Creating EventLog source NetCoreCompiler in log Application...
+Committing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Uninstalling assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Removing EventLog source NetCoreCompiler.
+Service NetCoreCompiler is being removed from the system...
+Service NetCoreCompiler was successfully removed from the system.
+Attempt to stop service NetCoreCompiler.
+Uninstalling assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Removing EventLog source NetCoreCompiler.
+Warning: The source NetCoreCompiler is not registered on the local machine.
+Service NetCoreCompiler is being removed from the system...
+Service NetCoreCompiler was successfully removed from the system.
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler [DevopsTesting]...
+Creating EventLog source NetCoreCompiler [DevopsTesting] in log Application...
+Rolling back assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Restoring event log to previous state for source NetCoreCompiler [DevopsTesting].
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler [DevopsTesting]...
+Service NetCoreCompiler [DevopsTesting] has been successfully installed.
+Creating EventLog source NetCoreCompiler [DevopsTesting] in log Application...
+Committing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler [DevopsTesting]...
+Service NetCoreCompiler [DevopsTesting] has been successfully installed.
+Creating EventLog source NetCoreCompiler [DevopsTesting] in log Application...
+Committing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe
+Installing service NetCoreCompiler [DevopsTesting]...
+Service NetCoreCompiler [DevopsTesting] has been successfully installed.
+Creating EventLog source NetCoreCompiler [DevopsTesting] in log Application...
+Committing assembly 'D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe'.
+Affected parameters are:
+   startargs = D:\Personal\DevopsTesting\DevopsTesting
+   logtoconsole = 
+   websitename = DevopsTesting
+   logfile = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.InstallLog
+   assemblypath = D:\Personal\NetCoreCompiler\NetCoreCompiler\NetCoreCompiler\bin\Debug\NetCoreCompiler.exe

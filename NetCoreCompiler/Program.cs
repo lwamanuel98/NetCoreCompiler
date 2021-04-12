@@ -55,6 +55,9 @@ namespace NetCoreCompiler
                     defaults.Add("current_switch", "0");
                     defaults.Add("switch_folder_0", "www");
                     defaults.Add("switch_folder_1", "www1");
+                    defaults.Add("switch_folder_2", "www2");
+                    defaults.Add("switch_folder_3", "www3");
+                    //defaults.Add("switch_folder_4", "www4");
 
                     File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
 
@@ -67,6 +70,20 @@ namespace NetCoreCompiler
                 Dictionary<string, string> defaults = value;
 
                 File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
+            }
+        }
+        public static int MaxSwitch
+        {
+            get
+            {
+                var settings = Settings;
+                int i = 0;
+                while (settings.ContainsKey("switch_folder_" + i))
+                {
+                    i++;
+                }
+                i--; // remove one, it broke out of the loop as it didnt exist!
+                return i;
             }
         }
         public static int CurrentSwitch
@@ -92,9 +109,9 @@ namespace NetCoreCompiler
 
         public static void NextSwitchFolder()
         {
-            if (CurrentSwitch == 0)
-                CurrentSwitch = 1;
-            else if (CurrentSwitch == 1)
+            if (CurrentSwitch < MaxSwitch)
+                CurrentSwitch++;
+            else
                 CurrentSwitch = 0;
         }
 

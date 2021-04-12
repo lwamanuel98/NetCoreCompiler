@@ -142,12 +142,13 @@ namespace NetCoreCompiler
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            string log = "";
             try
             {
                 if (building)
                     return;
 
-                Program.logToFile($"Changed: {e.FullPath}");
+                log += ($"Changed: {e.FullPath}") + "\r\n";
 
                 string result, error;
 
@@ -155,7 +156,7 @@ namespace NetCoreCompiler
 
                 //stopAppPool(Program.SITE_NAME);
 
-                Program.logToFile("Initializing Build/Publish...");
+                log += ("Initializing Build/Publish...") + "\r\n";
 
                 building = true;
                 watcher.EnableRaisingEvents = false;
@@ -171,23 +172,22 @@ namespace NetCoreCompiler
 
                 string buildFolder = Program.CurrentSwitchFolder;
 
-
-                Program.logToFile("Building project to: (" + buildFolder + ")...");
+                log += ("Building project to: (" + buildFolder + ")...") + "\r\n";
 
                 RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), out result, out error);
 
-                Program.logToFile(result);
-                Program.logToFile(error);
+                log += ("Publish finished see result in next entry (" + buildFolder + ")...") + "\r\n";
 
-                Program.logToFile("Publish finished see result in next entry (" + buildFolder + ")...");
+                log +=(result) + "\r\n";
+                log += (error) + "\r\n";
 
-                Program.logToFile("Perform the IIS switch to: " + buildFolder);
+                log += ("Perform the IIS switch to: " + buildFolder) + "\r\n";
+                log += ("Complete!") + "\r\n";
 
                 doIisSwitch(Program.WEBSITE_NAME, buildFolder);
 
-                Program.logToFile("Running iis reset...");
 
-
+                /*Program.logToFile("Running iis reset...");                
                 // stop
                 appPool.Stop();
 
@@ -203,10 +203,8 @@ namespace NetCoreCompiler
                 // start again
                 appPool.Start();
 
-                Program.logToFile(result);
-                Program.logToFile(error);
-
                 Program.logToFile("Recyle the app pool to clear any use of the old switch files");
+                
 
                 try
                 {
@@ -225,7 +223,7 @@ namespace NetCoreCompiler
                 {
                     Program.logToFile("Failed to clear old switch");
                     Program.logToFile(ex.Message);
-                }
+                }*/
 
                 //startAppPool(Program.POOL_NAME);
 
@@ -237,6 +235,7 @@ namespace NetCoreCompiler
                 Program.logToFile(ex.Message);
             }
 
+            Program.logToFile(log);
         }
         private static void OnError(object sender, ErrorEventArgs e) =>
             PrintException(e.GetException());

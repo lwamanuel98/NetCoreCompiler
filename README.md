@@ -46,11 +46,13 @@ Steps:
 Website Setup:
 1) Place a "settings.ncc" in the root of your website, where the "*.csproj" can be found
 2) Configure the settings files as follows:
+
 	{
 		"WebsiteName": "Name Of Website In IIS",
 		"ApplicationPoolName": "Exact Name Of Application Pool In IIS",
 		"BuildDirectory": "Directory Where The Build Should Reside e.g. /www"
 	}
+	
 3) Any changes made will automatically trigger a build to a temporary folder, the application pool will be shutdown, build files transferred and the application pool is restarted.
 
 ------------------
@@ -60,4 +62,5 @@ Parameters
 Required parameters:
 
  - /WatchDirectory
+ 
 		Should be the folder that contains all websites on your web server e.g. "/home" or "/inetpub/wwwroot". This folder will be watched and where a "settings.ncc" file can be found will determine the websites that should be built via the NCC.

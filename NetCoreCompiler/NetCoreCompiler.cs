@@ -1,21 +1,24 @@
 ﻿using Microsoft.Web.Administration;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NetCoreCompiler
 {
     public partial class NetCoreCompiler : ServiceBase
     {
         FileSystemWatcher watcher = null;
+        string fileChanged = "";
+        public Process buildProcess = null;
+        public class BuildFile
+        {
+            public string WebsiteName { get; set; }
+            public string ApplicationPoolName { get; set; }
+            public string BuildDirectory { get; set; }
+            public string Location { get; set; }
+        }
         public NetCoreCompiler()
         {
             InitializeComponent();
@@ -24,27 +27,15 @@ namespace NetCoreCompiler
         protected override void OnStart(string[] args)
         {
             args = Environment.GetCommandLineArgs();
-            if (args.Length >= 4)
+            if (args.Length >= 1)
             {
                 if (args[1] != "")
-                    Program.BUILD_DIRECTORY = args[1];
-                if (args[2] != "")
-                    Program.WEBSITE_NAME = args[2];
-                if (args[3] != "")
-                    Program.POOL_NAME = args[3];
-                if (args[4] != "")
-                    Program.APPLICATION_PATH = args[4];
-                if(args[5] != "")
-                    Program.DEST_DIRECTORY = args[5];
-
-
-                if (Program.POOL_NAME == "")
-                    Program.POOL_NAME = Program.WEBSITE_NAME;
+                    Program.WATCH_DIRECTORY = args[1];
             }
 
-            Program.logToFile("Watcher starting... \r\nDir to watch = " + Program.BUILD_DIRECTORY + "\r\nSiteName: " + Program.WEBSITE_NAME);
+            Console.WriteLine("Watcher starting... \r\nDir to watch = " + Program.WATCH_DIRECTORY);
 
-            watcher = new FileSystemWatcher(Program.BUILD_DIRECTORY);
+            watcher = new FileSystemWatcher(Program.WATCH_DIRECTORY);
 
             watcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
@@ -64,15 +55,16 @@ namespace NetCoreCompiler
             watcher.EnableRaisingEvents = true;
 
 
-            Program.logToFile("Watcher started...");
+            Console.WriteLine("Watcher started...");
+
+
         }
 
-        public void RunCMD(string cmd, out string result, out string error)
+        public Process RunCMD(string cmd, string workingDir, out string result, out string error)
         {
-
             ProcessStartInfo psiDotNetRestore = new ProcessStartInfo(@"C:\Windows\System32\cmd.exe", "/c " + cmd);
             psiDotNetRestore.WindowStyle = ProcessWindowStyle.Maximized;
-            psiDotNetRestore.WorkingDirectory = Program.BUILD_DIRECTORY;
+            psiDotNetRestore.WorkingDirectory = workingDir;
 
             psiDotNetRestore.RedirectStandardOutput = true;
             psiDotNetRestore.RedirectStandardError = true;
@@ -83,160 +75,188 @@ namespace NetCoreCompiler
             proc.StartInfo = psiDotNetRestore;
             proc.Start();
 
-            proc.WaitForExit();
-
             result = proc.StandardOutput.ReadToEnd();
             error = proc.StandardError.ReadToEnd();
-        }
-        public bool building = false;
 
-        public void stopAppPool(string poolName)
-        {
-            try
-            {
-                var serverManager = new ServerManager();
-                var appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(poolName));
-                if (appPool == null)
-                    return;
-                appPool.Stop();
-            }
-            catch (Exception)
-            {
+            buildProcess = proc;
 
-            }
-        }
-        public void doIisSwitch(string websiteName, string location)
-        {
-            try
-            {
-                var serverManager = new ServerManager();
-                var website = serverManager.Sites.FirstOrDefault(ap => ap.Name.Equals(websiteName));
-                if (website == null)
-                    return;
-                website.Applications[Program.APPLICATION_PATH].VirtualDirectories["/"].PhysicalPath = location;
-
-                serverManager.CommitChanges();
-
-            }
-            catch (Exception)
-            {
-
-            }
-
-        }
-        public void startAppPool(string poolName)
-        {
-            try
-            {
-                var serverManager = new ServerManager();
-                var appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(poolName));
-                if (appPool == null)
-                    return;
-                appPool.Start();
-            }
-            catch (Exception)
-            {
-
-            }
+            return proc;
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            string log = "";
+            if (Path.GetExtension(e.FullPath).Equals(""))
+                return;
+
             try
             {
-                if (building)
-                    return;
+                Console.WriteLine($"Changed: {e.FullPath}" + "\r\n");
 
-                log += ($"Changed: {e.FullPath}") + "\r\n";
+                fileChanged = e.FullPath;
 
-                string result, error;
-
-                //Program.logToFile("Attempting to stop website...");
-
-                //stopAppPool(Program.SITE_NAME);
-
-                log += ("Initializing Build/Publish...") + "\r\n";
-
-                building = true;
-                watcher.EnableRaisingEvents = false;
-
-                var serverManager = new ServerManager();
-                var appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(Program.POOL_NAME));
-                if (appPool == null)
-                    return;
-
-                string oldSwitchFolder = Program.CurrentSwitchFolder;
-
-                Program.NextSwitchFolder();
-
-                string buildFolder = Program.CurrentSwitchFolder;
-
-                log += ("Building project to: (" + buildFolder + ")...") + "\r\n";
-
-                RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), out result, out error);
-
-                log += ("Publish finished see result in next entry (" + buildFolder + ")...") + "\r\n";
-
-                log +=(result) + "\r\n";
-                log += (error) + "\r\n";
-
-                log += ("Perform the IIS switch to: " + buildFolder) + "\r\n";
-                log += ("Complete!") + "\r\n";
-
-                doIisSwitch(Program.WEBSITE_NAME, buildFolder);
-
-
-                /*Program.logToFile("Running iis reset...");                
-                // stop
-                appPool.Stop();
-
-                // wait until stopped
-                while (appPool.State != ObjectState.Stopped)
-                {
-                    // re get state
-                    appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(Program.POOL_NAME));
-                    if (appPool == null)
-                        return;
-                }
-
-                // start again
-                appPool.Start();
-
-                Program.logToFile("Recyle the app pool to clear any use of the old switch files");
-                
-
-                try
-                {
-                    System.IO.DirectoryInfo di = new DirectoryInfo(oldSwitchFolder);
-
-                    foreach (FileInfo file in di.GetFiles())
-                    {
-                        file.Delete();
-                    }
-                    foreach (DirectoryInfo dir in di.GetDirectories())
-                    {
-                        dir.Delete(true);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Program.logToFile("Failed to clear old switch");
-                    Program.logToFile(ex.Message);
-                }*/
-
-                //startAppPool(Program.POOL_NAME);
-
-                building = false;
-                watcher.EnableRaisingEvents = true;
+                TriggerBuild();
             }
             catch (Exception ex)
             {
-                Program.logToFile(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
-            Program.logToFile(log);
         }
+
+
+
+        public BuildFile GetBuildFile(string fileChanged)
+        {
+            string fileName = Path.GetFileName(fileChanged);
+            string path = Path.GetDirectoryName(fileChanged).Replace("\\", "/");
+            string watchDir = Program.WATCH_DIRECTORY.Replace("\\", "/");
+
+            string file = Directory.EnumerateFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
+            while (file == null)
+            {
+                path = Path.GetFullPath(Path.Combine(path, @"../")).Replace("\\", "/");
+
+                file = Directory.EnumerateFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
+
+                if (file == null && (watchDir == path || path == watchDir + "/"))
+                    break;
+            }
+
+            if (file == null)
+                return null;
+
+            BuildFile bf = new BuildFile();
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(File.OpenRead(file)))
+                {
+                    bf = Newtonsoft.Json.JsonConvert.DeserializeObject<BuildFile>(sr.ReadToEnd());
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to parse build file!");
+                return null;
+            }
+            if (bf == null)
+            {
+                Console.WriteLine("Failed to parse build file!");
+                return null;
+            }
+            bf.Location = path;
+
+            return bf;
+        }
+        private void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            sourcePath = sourcePath.Replace("/", "\\");
+            targetPath = targetPath.Replace("/", "\\");
+
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                if (!Directory.Exists(dirPath.Replace(sourcePath, targetPath)))
+                {
+                    Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                }
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
+        public void TriggerBuild()
+        {
+            var buildFile = GetBuildFile(fileChanged);
+            if (buildFile == null)
+            {
+                Console.WriteLine("No build settings file found.");
+                return;
+            }
+            if (fileChanged.Replace("\\", "/").Contains(buildFile.BuildDirectory.Replace("\\", "/")))
+            {
+                Console.WriteLine("Created by build!");
+                return;
+            }
+            Console.WriteLine("Build file found!");
+
+            if (buildProcess != null && !buildProcess.HasExited)
+            {
+                Console.WriteLine("Other build cancelled!");
+                buildProcess.Kill();
+                buildProcess = null;
+            }
+
+            try
+            {
+                string result, error;
+
+                var serverManager = new ServerManager();
+                var appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(buildFile.ApplicationPoolName));
+                if (appPool == null)
+                {
+                    Console.WriteLine("app pool is null");
+                    return;
+                }
+
+                string buildFolder = Path.Combine(Program.WebsiteTemp(buildFile.WebsiteName), "website_build");
+
+
+                DirectoryInfo dir = new DirectoryInfo(buildFolder);
+                if (dir.Exists)
+                    dir.Delete(true);
+
+
+
+
+                Console.WriteLine("Building...");
+                RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), buildFile.Location, out result, out error);
+
+                Console.Write(result);
+
+                if (buildProcess == null) // has been killed - new build will have started
+                {
+                    Console.WriteLine("Build cancelled!");
+
+                    return;
+                }
+
+                Console.WriteLine("Build complete!");
+
+                watcher.EnableRaisingEvents = false;
+
+                foreach (var wp in appPool.WorkerProcesses)
+                {
+                    Process.GetProcessById(wp.ProcessId).Kill();
+                }
+
+                if (appPool.State != ObjectState.Stopped)
+                {
+                    appPool.Stop();
+                    Console.WriteLine("Stopped app pool!");
+                }
+
+                Console.WriteLine("Copying build directory!");
+
+                CopyFilesRecursively(buildFolder, buildFile.BuildDirectory);
+
+                Console.WriteLine("Copied!");
+                watcher.EnableRaisingEvents = true;
+
+                appPool.Start();
+
+                Console.WriteLine("application pool started!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
+            }
+        }
+
         private static void OnError(object sender, ErrorEventArgs e) =>
             PrintException(e.GetException());
 
@@ -244,7 +264,7 @@ namespace NetCoreCompiler
         {
             if (ex != null)
             {
-                Program.logToFile($"Message: {ex.Message}" + "\r\n" +
+                Console.WriteLine($"Message: {ex.Message}" + "\r\n" +
                     "Stacktrace:" + "\r\n" +
                     ex.StackTrace + "\r\n");
 

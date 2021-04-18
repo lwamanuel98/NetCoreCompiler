@@ -228,3 +228,4 @@ L:\Git\NetCoreCompiler\NetCoreCompiler\obj\Release\NetCoreCompiler.csproj.CoreCo
 L:\Git\NetCoreCompiler\NetCoreCompiler\obj\Release\NetCoreCompiler.csproj.CopyComplete
 L:\Git\NetCoreCompiler\NetCoreCompiler\obj\Release\NetCoreCompiler.exe
 L:\Git\NetCoreCompiler\NetCoreCompiler\obj\Release\NetCoreCompiler.pdb
+L:\Git\NetCoreCompiler\NetCoreCompiler\obj\Release\NetCoreCompiler.csprojAssemblyReference.cache

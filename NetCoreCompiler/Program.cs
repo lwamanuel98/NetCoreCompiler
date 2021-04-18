@@ -3,29 +3,29 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NetCoreCompiler
 {
     static class Program
     {
-        public static string WebsiteTemp
+        public static string WebsiteTemp(string websiteName)
         {
-            get
-            {
-                string dir = Path.Combine(TempDirectory, Program.WEBSITE_NAME);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                return dir;
-            }
+            string dir = Path.Combine(TempDirectory, websiteName);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            return dir;
+
         }
         public static string SettingsFile
         {
             get
             {
-                return Path.Combine(WebsiteTemp, "ncc.settings");
+                return Path.Combine(TempDirectory, "ncc.settings");
             }
         }
         public static string TempDirectory
@@ -38,7 +38,7 @@ namespace NetCoreCompiler
                 return dir;
             }
         }
-        public static Dictionary<string, string> Settings
+        public static Dictionary<string, object> Settings
         {
             get
             {
@@ -46,18 +46,12 @@ namespace NetCoreCompiler
                 {
                     using (StreamReader sr = new StreamReader(File.OpenRead(SettingsFile)))
                     {
-                        return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(sr.ReadToEnd());
+                        return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(sr.ReadToEnd());
                     }
                 }
                 else
                 {
-                    Dictionary<string, string> defaults = new Dictionary<string, string>();
-                    defaults.Add("current_switch", "0");
-                    defaults.Add("switch_folder_0", "www");
-                    defaults.Add("switch_folder_1", "www1");
-                    defaults.Add("switch_folder_2", "www2");
-                    defaults.Add("switch_folder_3", "www3");
-                    //defaults.Add("switch_folder_4", "www4");
+                    Dictionary<string, object> defaults = new Dictionary<string, object>();
 
                     File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
 
@@ -67,52 +61,10 @@ namespace NetCoreCompiler
             set
             {
 
-                Dictionary<string, string> defaults = value;
+                Dictionary<string, object> defaults = value;
 
                 File.WriteAllText(SettingsFile, Newtonsoft.Json.JsonConvert.SerializeObject(defaults));
             }
-        }
-        public static int MaxSwitch
-        {
-            get
-            {
-                var settings = Settings;
-                int i = 0;
-                while (settings.ContainsKey("switch_folder_" + i))
-                {
-                    i++;
-                }
-                i--; // remove one, it broke out of the loop as it didnt exist!
-                return i;
-            }
-        }
-        public static int CurrentSwitch
-        {
-            get
-            {
-                return int.Parse(Settings["current_switch"]);
-            }
-            set
-            {
-                Dictionary<string, string> settings = Settings;
-                settings["current_switch"] = value.ToString();
-                Settings = settings;
-            }
-        }
-        public static string CurrentSwitchFolder
-        {
-            get
-            {
-                return Path.Combine(DEST_DIRECTORY, Settings["switch_folder_" + CurrentSwitch]);
-            }
-        }
-
-        public static void NextSwitchFolder()
-        {
-            if (CurrentSwitch < MaxSwitch)
-                CurrentSwitch++;
-            else
-                CurrentSwitch = 0;
         }
 
         private static EventLog eventLog1 = null;
@@ -125,7 +77,7 @@ namespace NetCoreCompiler
 
         public static void initEventLog()
         {
-            if(eventLog1 == null)
+            if (eventLog1 == null)
             {
                 eventLog1 = new System.Diagnostics.EventLog();
                 if (!System.Diagnostics.EventLog.SourceExists("NetCoreCompiler"))
@@ -138,11 +90,7 @@ namespace NetCoreCompiler
             }
         }
 
-        public static string BUILD_DIRECTORY = "";
-        public static string WEBSITE_NAME = "";
-        public static string POOL_NAME = "";
-        public static string APPLICATION_PATH = "/";
-        public static string DEST_DIRECTORY = WebsiteTemp;
+        public static string WATCH_DIRECTORY = "";
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -153,7 +101,48 @@ namespace NetCoreCompiler
             {
                 new NetCoreCompiler()
             };
-            ServiceBase.Run(ServicesToRun);
+            if (!Environment.UserInteractive)
+            {
+                ServiceBase.Run(ServicesToRun);
+            }
+            else
+            {
+                RunInteractive(ServicesToRun);
+            }
+        }
+        static void RunInteractive(ServiceBase[] servicesToRun)
+        {
+            Console.WriteLine("Services running in interactive mode.");
+            Console.WriteLine();
+
+            MethodInfo onStartMethod = typeof(ServiceBase).GetMethod("OnStart",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (ServiceBase service in servicesToRun)
+            {
+                Console.Write("Starting {0}...", service.ServiceName);
+                onStartMethod.Invoke(service, new object[] { new string[] { } });
+                Console.Write("Started");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine(
+                "Press any key to stop the services and end the process...");
+            Console.ReadKey();
+            Console.WriteLine();
+
+            MethodInfo onStopMethod = typeof(ServiceBase).GetMethod("OnStop",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (ServiceBase service in servicesToRun)
+            {
+                Console.Write("Stopping {0}...", service.ServiceName);
+                onStopMethod.Invoke(service, null);
+                Console.WriteLine("Stopped");
+            }
+
+            Console.WriteLine("All services stopped.");
+            // Keep the console alive for a second to allow the user to see the message.
+            Thread.Sleep(1000);
         }
     }
 }

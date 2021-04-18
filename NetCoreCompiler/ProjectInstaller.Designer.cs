@@ -40,7 +40,7 @@ namespace NetCoreCompiler
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.ServiceName = ".Net Core Compiler [DevOps Testing]";
+            this.serviceInstaller1.ServiceName = ".Net Core Compiler V2";
             // 
             // ProjectInstaller
             // 

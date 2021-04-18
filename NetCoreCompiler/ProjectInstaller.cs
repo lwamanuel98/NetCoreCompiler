@@ -24,40 +24,18 @@ namespace NetCoreCompiler
         }
         protected override void OnBeforeInstall(IDictionary savedState)
         {
-            SetServiceName();
-
             Context.Parameters["assemblypath"] = "\"" + Context.Parameters["assemblypath"] + "\"";
 
             Context.Parameters["assemblypath"] = Context.Parameters["assemblypath"]
-                .AppendParameter(Context.Parameters["BuildDirectory"])
-                .AppendParameter(Context.Parameters["WebsiteName"])
-                .AppendParameter(Context.Parameters["PoolName"])
-                .AppendParameter(Context.Parameters["ApplicationPath"])
-                .AppendParameter(Context.Parameters["DestinationDirectory"]);
+                .AppendParameter(Context.Parameters["WatchDirectory"]);
 
             Program.logToFile("Assembly Path: " + Context.Parameters["assemblypath"]);
 
             base.OnBeforeInstall(savedState);
         }
         protected override void OnBeforeUninstall(IDictionary savedState)
-        {
-            SetServiceName(); 
-            
+        {            
             base.OnBeforeUninstall(savedState);
-        }
-        private void SetServiceName()
-        {
-            if (Context.Parameters.ContainsKey("WebsiteName"))
-            {
-                serviceInstaller1.ServiceName = "NetCoreCompiler [" + Context.Parameters["WebsiteName"] + "]";
-            }
-
-            if (Context.Parameters.ContainsKey("DisplayName"))
-            {
-                serviceInstaller1.DisplayName = Context.Parameters["DisplayName"];
-            }
-
-            Program.logToFile("Service Name: " + serviceInstaller1.ServiceName + "; Display Name: " + serviceInstaller1.DisplayName);
         }
     }
 }

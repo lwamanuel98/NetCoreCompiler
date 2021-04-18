@@ -46,7 +46,6 @@ Steps:
 Website Setup:
 1) Place a "settings.ncc" in the root of your website, where the "*.csproj" can be found
 2) Configure the settings files as follows:
-
 	{
 		"WebsiteName": "Name Of Website In IIS",
 		"ApplicationPoolName": "Exact Name Of Application Pool In IIS",

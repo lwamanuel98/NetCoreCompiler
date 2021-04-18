@@ -12,7 +12,6 @@ namespace NetCoreCompiler
     public static class Logging
     {
         public static TcpListener tcpListener;
-        private static EventLog eventLog1 = null;
         public static List<Tuple<Socket, StreamWriter, StreamReader>> sockets = new List<Tuple<Socket, StreamWriter, StreamReader>>();
         public static void StartTCPListener()
         {

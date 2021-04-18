@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
+using System.Threading;
 
 namespace NetCoreCompiler
 {
@@ -54,23 +55,55 @@ namespace NetCoreCompiler
             if (Path.GetExtension(e.FullPath).Equals(""))
                 return;
 
-            try
-            {
-                Console.WriteLine($"Changed: {e.FullPath}" + "\r\n");
+            Variables.fileChanged = e.FullPath;
 
-                Variables.fileChanged = e.FullPath;
+            if (!Functions.CanBuild())
+                return;
 
-                Functions.TriggerBuild();
-            }
-            catch (Exception ex)
+            if (Variables.MainThread != null && Variables.MainThread.ThreadState != System.Threading.ThreadState.Suspended && Variables.MainThread.ThreadState != System.Threading.ThreadState.Stopped)
             {
-                Console.WriteLine(ex.Message);
+                Variables.MainThread.Suspend();
             }
+
+
+            ThreadStart ths = new ThreadStart(() =>
+            {
+                try
+                {
+                    Console.Clear();
+
+                    Console.Write("\r\n-----------\r\nBuild started!\r\n-----------\r\n\r\n");
+
+                    if (Variables.ProcessThread != null && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Suspended && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Stopped)
+                    {
+                        Console.Clear();
+
+                        Console.Write("\r\n-----------\r\nBuild restarted!\r\n-----------\r\n\r\n");
+                        if (!Variables.buildProcess.HasExited)
+                            Variables.buildProcess.Kill();
+                        Variables.ProcessThread.Suspend();
+                    }
+
+                    Functions.TriggerBuild();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
+
+            Variables.MainThread = new Thread(ths);
+            Variables.MainThread.Start();
+
+            Variables.watcher.EnableRaisingEvents = false;
+            Thread.Sleep(1000);
+            Variables.watcher.EnableRaisingEvents = true;
 
         }
         private static void OnError(object sender, ErrorEventArgs e)
         {
-            PrintException(e.GetException());
+            //PrintException(e.GetException()); surpressed
         }
         private static void PrintException(Exception ex)
         {

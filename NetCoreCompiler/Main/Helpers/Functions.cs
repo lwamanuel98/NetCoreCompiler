@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace NetCoreCompiler
 {
@@ -34,12 +35,12 @@ namespace NetCoreCompiler
             string path = Path.GetDirectoryName(fileChanged).Replace("\\", "/");
             string watchDir = Variables.WATCH_DIRECTORY.Replace("\\", "/");
 
-            string file = Directory.EnumerateFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
+            string file = Directory.GetFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
             while (file == null)
             {
                 path = Path.GetFullPath(Path.Combine(path, @"../")).Replace("\\", "/");
 
-                file = Directory.EnumerateFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
+                file = Directory.GetFiles(path).Where(x => x.EndsWith("settings.ncc")).FirstOrDefault();
 
                 if (file == null && (watchDir == path || path == watchDir + "/"))
                     break;
@@ -71,115 +72,146 @@ namespace NetCoreCompiler
 
             return bf;
         }
-        public static Process RunCMD(string cmd, string workingDir, out string result, out string error)
+
+        public static void RunCMD(string cmd, string workingDir, Variables.ProcessComplete callback)
         {
-            ProcessStartInfo psiDotNetRestore = new ProcessStartInfo(@"C:\Windows\System32\cmd.exe", "/c " + cmd);
-            psiDotNetRestore.WindowStyle = ProcessWindowStyle.Maximized;
-            psiDotNetRestore.WorkingDirectory = workingDir;
 
-            psiDotNetRestore.RedirectStandardOutput = true;
-            psiDotNetRestore.RedirectStandardError = true;
-            psiDotNetRestore.UseShellExecute = false;
-            psiDotNetRestore.CreateNoWindow = true;
+            ThreadStart ths = new ThreadStart(() => {
+                Variables.buildProcess = new Process();
 
-            Process proc = new Process();
-            proc.StartInfo = psiDotNetRestore;
-            proc.Start();
+                Variables.resultCMD = "";
+                Variables.errorCMD = "";
 
-            result = proc.StandardOutput.ReadToEnd();
-            error = proc.StandardError.ReadToEnd();
+                ProcessStartInfo psiDotNetRestore = new ProcessStartInfo(@"C:\Windows\System32\cmd.exe", "/c " + cmd);
+                psiDotNetRestore.WindowStyle = ProcessWindowStyle.Maximized;
+                psiDotNetRestore.WorkingDirectory = workingDir;
 
-            Variables.buildProcess = proc;
+                psiDotNetRestore.RedirectStandardOutput = true;
+                psiDotNetRestore.RedirectStandardError = true;
+                psiDotNetRestore.UseShellExecute = false;
+                psiDotNetRestore.CreateNoWindow = true;
 
-            return proc;
+
+                Variables.buildProcess.EnableRaisingEvents = true;
+
+                Variables.buildProcess.OutputDataReceived += Proc_OutputDataReceived;
+                Variables.buildProcess.ErrorDataReceived += Proc_ErrorDataReceived;
+
+                Variables.buildProcess.StartInfo = psiDotNetRestore;
+
+                Variables.buildProcess.Start();
+                Variables.buildProcess.BeginOutputReadLine();
+                Variables.buildProcess.BeginErrorReadLine();
+
+                Variables.buildProcess.WaitForExit();
+
+                callback.Invoke(Variables.buildProcess, Variables.resultCMD, Variables.errorCMD);
+            });
+            
+            Variables.ProcessThread = new Thread(ths);
+            Variables.ProcessThread.Start();
         }
 
+        private static void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+            Variables.errorCMD += e.Data + Environment.NewLine;
+        }
+
+        private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
+            Variables.resultCMD += e.Data + Environment.NewLine;
+        }
+        public static bool CanBuild()
+        {
+            if (Variables.fileChanged.Replace("\\", "/").Contains("/obj/"))
+                return false;
+            if (Variables.fileChanged.Replace("\\", "/").Contains("/bin/"))
+                return false;
+
+            Variables.currentBuildFile = Functions.GetBuildFile(Variables.fileChanged);
+
+            if (Variables.currentBuildFile == null)
+            {
+                //Console.WriteLine("No build settings file found.");
+                return false;
+            }
+            if (Variables.fileChanged.Replace("\\", "/").Contains(Variables.currentBuildFile.BuildDirectory.Replace("\\", "/")))
+            {
+                //Console.WriteLine("Created by build!");
+                return false;
+            }
+            return true;
+        }
         public static void TriggerBuild()
         {
-            var buildFile = GetBuildFile(Variables.fileChanged);
-            if (buildFile == null)
-            {
-                Console.WriteLine("No build settings file found.");
-                return;
-            }
-            if (Variables.fileChanged.Replace("\\", "/").Contains(buildFile.BuildDirectory.Replace("\\", "/")))
-            {
-                Console.WriteLine("Created by build!");
-                return;
-            }
-            Console.WriteLine("Build file found!");
+            Console.WriteLine($"Changed: {Variables.fileChanged}.");
 
-            if (Variables.buildProcess != null && !Variables.buildProcess.HasExited)
-            {
-                Console.WriteLine("Other build cancelled!");
-                Variables.buildProcess.Kill();
-                Variables.buildProcess = null;
-            }
+            Console.WriteLine("Build file found!");
 
             try
             {
-                string result, error;
-
                 var serverManager = new ServerManager();
-                var appPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(buildFile.ApplicationPoolName));
-                if (appPool == null)
+                Variables.currentBuildAppPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(Variables.currentBuildFile.ApplicationPoolName));
+                if (Variables.currentBuildAppPool == null)
                 {
                     Console.WriteLine("app pool is null");
                     return;
                 }
 
-                string buildFolder = Path.Combine(Variables.WebsiteTemp(buildFile.WebsiteName), "website_build");
-
+                string buildFolder = Path.Combine(Variables.WebsiteTemp(Variables.currentBuildFile.WebsiteName), "website_build");
 
                 DirectoryInfo dir = new DirectoryInfo(buildFolder);
                 if (dir.Exists)
                     dir.Delete(true);
 
 
-
-
                 Console.WriteLine("Building...");
-                RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), buildFile.Location, out result, out error);
 
-                Console.Write(result);
+                RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), Variables.currentBuildFile.Location, BuildComplete);
 
-                if (Variables.buildProcess == null) // has been killed - new build will have started
-                {
-                    Console.WriteLine("Build cancelled!");
-
-                    return;
-                }
-
-                Console.WriteLine("Build complete!");
-
-                Variables.watcher.EnableRaisingEvents = false;
-
-                foreach (var wp in appPool.WorkerProcesses)
-                {
-                    Process.GetProcessById(wp.ProcessId).Kill();
-                }
-
-                if (appPool.State != ObjectState.Stopped)
-                {
-                    appPool.Stop();
-                    Console.WriteLine("Stopped app pool!");
-                }
-
-                Console.WriteLine("Copying build directory!");
-
-                CopyFilesRecursively(buildFolder, buildFile.BuildDirectory);
-
-                Console.WriteLine("Copied!");
-                Variables.watcher.EnableRaisingEvents = true;
-
-                appPool.Start();
-
-                Console.WriteLine("application pool started!");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
             }
+        }
+
+        public static void BuildComplete(Process proc, string result, string error)
+        {
+            if (proc.ExitCode != 0)
+            {
+                Console.WriteLine("Build error detected! Cancelling process.");
+                // disable watch for a moment. Obj files may have changed triggering another build process
+                return;
+            }
+
+            string buildFolder = Path.Combine(Variables.WebsiteTemp(Variables.currentBuildFile.WebsiteName), "website_build");
+
+            Console.WriteLine("Build complete!");
+
+
+            foreach (var wp in Variables.currentBuildAppPool.WorkerProcesses)
+            {
+                Process.GetProcessById(wp.ProcessId).Kill();
+            }
+
+            if (Variables.currentBuildAppPool.State != ObjectState.Stopped)
+            {
+                Variables.currentBuildAppPool.Stop();
+                Console.WriteLine("Stopped app pool!");
+            }
+
+            Console.WriteLine("Copying build directory!");
+
+            CopyFilesRecursively(buildFolder, Variables.currentBuildFile.BuildDirectory);
+
+            Console.WriteLine("Copied!");
+
+            Variables.currentBuildAppPool.Start();
+
+            Console.WriteLine("application pool started!");
         }
     }
 }

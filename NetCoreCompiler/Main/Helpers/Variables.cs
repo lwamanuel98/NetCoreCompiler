@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Web.Administration;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace NetCoreCompiler
 {
@@ -9,6 +11,14 @@ namespace NetCoreCompiler
         public static FileSystemWatcher watcher = null;
         public static string fileChanged = "";
         public static Process buildProcess = null;
+
+        public static string resultCMD, errorCMD;
+        public static Thread MainThread = null;
+        public static Thread ProcessThread = null;
+        public static ApplicationPool currentBuildAppPool;
+        public static BuildFile currentBuildFile;
+
+        public delegate void ProcessComplete(Process proc, string result, string error);
 
         public class BuildFile
         {

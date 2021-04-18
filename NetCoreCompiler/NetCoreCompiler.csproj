@@ -142,6 +142,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Main\Helpers\Extensions\SocketExtensions.cs" />
     <Compile Include="Main\Helpers\Functions.cs" />
     <Compile Include="Main\Helpers\Logging.cs" />
     <Compile Include="ProjectInstaller\ProjectInstaller.cs">

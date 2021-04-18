@@ -18,13 +18,24 @@ namespace NetCoreCompiler
         protected override void OnStart(string[] args)
         {
             args = Environment.GetCommandLineArgs();
-            if (args.Length >= 1)
+            if (args.Length > 1)
             {
                 if (args[1] != "")
                     Variables.WATCH_DIRECTORY = args[1];
+                if (args.Length > 2)
+                {
+                    if (args[2] != "")
+                    {
+                        Variables.TCP_IP = args[2];
+                    }
+                }
             }
 
-            Console.WriteLine("Watcher starting... \r\nDir to watch = " + Variables.WATCH_DIRECTORY);
+            Logging.StartTCPListener();
+
+
+
+            Logging.TransmitLog("Watcher starting... \r\nDir to watch = " + Variables.WATCH_DIRECTORY);
 
             Variables.watcher = new FileSystemWatcher(Variables.WATCH_DIRECTORY);
 
@@ -46,7 +57,7 @@ namespace NetCoreCompiler
             Variables.watcher.EnableRaisingEvents = true;
 
 
-            Console.WriteLine("Watcher started...");
+            Logging.TransmitLog("Watcher started...");
 
 
         }
@@ -70,18 +81,16 @@ namespace NetCoreCompiler
             {
                 try
                 {
-                    Console.Clear();
-
-                    Console.Write("\r\n-----------\r\nBuild started!\r\n-----------\r\n\r\n");
 
                     if (Variables.ProcessThread != null && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Suspended && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Stopped)
                     {
-                        Console.Clear();
-
-                        Console.Write("\r\n-----------\r\nBuild restarted!\r\n-----------\r\n\r\n");
+                        Logging.TransmitLog("\r\n-----------\r\nBuild restarted!\r\n-----------\r\n\r\n");
                         if (!Variables.buildProcess.HasExited)
                             Variables.buildProcess.Kill();
                         Variables.ProcessThread.Suspend();
+                    } else
+                    {
+                        Logging.TransmitLog("\r\n-----------\r\nBuild started!\r\n-----------\r\n\r\n");
                     }
 
                     Functions.TriggerBuild();
@@ -89,7 +98,7 @@ namespace NetCoreCompiler
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Logging.TransmitLog(ex.Message);
                 }
             });
 
@@ -109,7 +118,7 @@ namespace NetCoreCompiler
         {
             if (ex != null)
             {
-                Console.WriteLine($"Message: {ex.Message}" + "\r\n" +
+                Logging.TransmitLog($"Message: {ex.Message}" + "\r\n" +
                     "Stacktrace:" + "\r\n" +
                     ex.StackTrace + "\r\n");
 
@@ -118,6 +127,7 @@ namespace NetCoreCompiler
         }
         protected override void OnStop()
         {
+            Logging.StopTCPListener();
         }
     }
 }

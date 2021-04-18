@@ -60,12 +60,12 @@ namespace NetCoreCompiler
             }
             catch (Exception)
             {
-                Console.WriteLine("Failed to parse build file!");
+                Logging.TransmitLog("Failed to parse build file!");
                 return null;
             }
             if (bf == null)
             {
-                Console.WriteLine("Failed to parse build file!");
+                Logging.TransmitLog("Failed to parse build file!");
                 return null;
             }
             bf.Location = path;
@@ -114,13 +114,13 @@ namespace NetCoreCompiler
 
         private static void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Console.WriteLine(e.Data);
+            Logging.TransmitLog(e.Data);
             Variables.errorCMD += e.Data + Environment.NewLine;
         }
 
         private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            Console.WriteLine(e.Data);
+            Logging.TransmitLog(e.Data);
             Variables.resultCMD += e.Data + Environment.NewLine;
         }
         public static bool CanBuild()
@@ -134,21 +134,21 @@ namespace NetCoreCompiler
 
             if (Variables.currentBuildFile == null)
             {
-                //Console.WriteLine("No build settings file found.");
+                //Logging.TransmitLog("No build settings file found.");
                 return false;
             }
             if (Variables.fileChanged.Replace("\\", "/").Contains(Variables.currentBuildFile.BuildDirectory.Replace("\\", "/")))
             {
-                //Console.WriteLine("Created by build!");
+                //Logging.TransmitLog("Created by build!");
                 return false;
             }
             return true;
         }
         public static void TriggerBuild()
         {
-            Console.WriteLine($"Changed: {Variables.fileChanged}.");
+            Logging.TransmitLog($"Changed: {Variables.fileChanged}.");
 
-            Console.WriteLine("Build file found!");
+            Logging.TransmitLog("Build file found!");
 
             try
             {
@@ -156,7 +156,7 @@ namespace NetCoreCompiler
                 Variables.currentBuildAppPool = serverManager.ApplicationPools.FirstOrDefault(ap => ap.Name.Equals(Variables.currentBuildFile.ApplicationPoolName));
                 if (Variables.currentBuildAppPool == null)
                 {
-                    Console.WriteLine("app pool is null");
+                    Logging.TransmitLog("app pool is null");
                     return;
                 }
 
@@ -167,14 +167,14 @@ namespace NetCoreCompiler
                     dir.Delete(true);
 
 
-                Console.WriteLine("Building...");
+                Logging.TransmitLog("Building...");
 
                 RunCMD(string.Format("dotnet publish -c Release -o \"{0}\"", buildFolder), Variables.currentBuildFile.Location, BuildComplete);
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
+                Logging.TransmitLog(ex.Message + "\r\n" + ex.StackTrace);
             }
         }
 
@@ -182,14 +182,14 @@ namespace NetCoreCompiler
         {
             if (proc.ExitCode != 0)
             {
-                Console.WriteLine("Build error detected! Cancelling process.");
+                Logging.TransmitLog("Build error detected! Cancelling process.");
                 // disable watch for a moment. Obj files may have changed triggering another build process
                 return;
             }
 
             string buildFolder = Path.Combine(Variables.WebsiteTemp(Variables.currentBuildFile.WebsiteName), "website_build");
 
-            Console.WriteLine("Build complete!");
+            Logging.TransmitLog("Build complete!");
 
 
             foreach (var wp in Variables.currentBuildAppPool.WorkerProcesses)
@@ -200,18 +200,18 @@ namespace NetCoreCompiler
             if (Variables.currentBuildAppPool.State != ObjectState.Stopped)
             {
                 Variables.currentBuildAppPool.Stop();
-                Console.WriteLine("Stopped app pool!");
+                Logging.TransmitLog("Stopped app pool!");
             }
 
-            Console.WriteLine("Copying build directory!");
+            Logging.TransmitLog("Copying build directory!");
 
             CopyFilesRecursively(buildFolder, Variables.currentBuildFile.BuildDirectory);
 
-            Console.WriteLine("Copied!");
+            Logging.TransmitLog("Copied!");
 
             Variables.currentBuildAppPool.Start();
 
-            Console.WriteLine("application pool started!");
+            Logging.TransmitLog("application pool started!");
         }
     }
 }

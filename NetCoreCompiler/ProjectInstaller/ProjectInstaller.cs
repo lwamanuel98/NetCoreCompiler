@@ -29,7 +29,6 @@ namespace NetCoreCompiler
             Context.Parameters["assemblypath"] = Context.Parameters["assemblypath"]
                 .AppendParameter(Context.Parameters["WatchDirectory"]);
 
-            Logging.logToFile("Assembly Path: " + Context.Parameters["assemblypath"]);
 
             base.OnBeforeInstall(savedState);
         }

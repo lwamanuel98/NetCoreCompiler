@@ -8,6 +8,8 @@ namespace NetCoreCompiler
     public static class Variables
     {
         public static string WATCH_DIRECTORY = "";
+        public static string TCP_IP = "";
+
         public static FileSystemWatcher watcher = null;
         public static string fileChanged = "";
         public static Process buildProcess = null;

@@ -31,7 +31,10 @@ namespace NetCoreCompiler
                 {
                     try
                     {
-                        Console.WriteLine("Waiting for TCP connection...");
+                        if (tcpListener == null)
+                            break;
+
+                        Console.WriteLine("Waiting for TCP connection(s)...");
                         var socket = tcpListener.AcceptSocket();
                         if (socket != null && socket.SocketType == SocketType.Stream && socket.Connected)
                         {
@@ -43,21 +46,27 @@ namespace NetCoreCompiler
                             var existingSock = sockets.Where(x => (x.Item1.RemoteEndPoint as IPEndPoint).Address.ToString() == (socket.RemoteEndPoint as IPEndPoint).Address.ToString()).FirstOrDefault();
                             if (existingSock != null)
                             {
+                                bool stillConnect = true;
                                 if (!existingSock.Item1.IsConnected())
                                 {
                                     sockets.Remove(existingSock);
-                                    Console.WriteLine("TCP connection with " + (socket.RemoteEndPoint as IPEndPoint).Address + " re-established...");
+                                    stillConnect = false;
                                 }
+
+                                sockets.Add(new Tuple<Socket, StreamWriter, StreamReader>(socket, sw, sr));
+
+                                if (stillConnect)
+                                    TransmitLog("New TCP connection found from same client (" + (socket.RemoteEndPoint as IPEndPoint).Address + ")... Welcome!", null);
                                 else
-                                {
-                                    Console.WriteLine("Another TCP connection found from same client (" + (socket.RemoteEndPoint as IPEndPoint).Address + ")...");
-                                }
-                            } else
+                                    TransmitLog("TCP connection with " + (socket.RemoteEndPoint as IPEndPoint).Address + " re-established... Welcome!", null);
+                            }
+                            else
                             {
-                                Console.WriteLine("TCP connection found (" + (socket.RemoteEndPoint as IPEndPoint).Address + ")...");
+                                sockets.Add(new Tuple<Socket, StreamWriter, StreamReader>(socket, sw, sr));
+
+                                TransmitLog("TCP connection found (" + (socket.RemoteEndPoint as IPEndPoint).Address + ")... Welcome!", null);
                             }
 
-                            sockets.Add(new Tuple<Socket, StreamWriter, StreamReader>(socket, sw, sr));
 
                         }
 
@@ -87,16 +96,24 @@ namespace NetCoreCompiler
             sockets.Clear();
 
             tcpListener.Stop();
+
+            tcpListener = null;
         }
-        public static void TransmitLog(string txt)
+        public static void TransmitLog(string txt, string website)
         {
+            if (website == null)
+                website = "System";
+
+            Console.WriteLine("Broadcasting: " + txt);
             // transmit to all connect clients
             sockets.ForEach(soc =>
             {
                 if (soc != null && soc.Item1 != null && soc.Item1.SocketType == SocketType.Stream && soc.Item1.IsConnected())
                 {
+                    if (txt != null)
+                        txt = txt.Replace("\r\n", "\r\n" + website + "|");
                     if (soc.Item2 != null)
-                        soc.Item2.WriteLine(txt);
+                        soc.Item2.WriteLine(website + "|" + txt);
                 }
             });
 

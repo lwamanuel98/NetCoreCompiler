@@ -35,7 +35,7 @@ namespace NetCoreCompiler
 
 
 
-            Logging.TransmitLog("Watcher starting... \r\nDir to watch = " + Variables.WATCH_DIRECTORY);
+            Logging.TransmitLog("Watcher starting... \r\nDir to watch = " + Variables.WATCH_DIRECTORY, null);
 
             Variables.watcher = new FileSystemWatcher(Variables.WATCH_DIRECTORY);
 
@@ -57,7 +57,7 @@ namespace NetCoreCompiler
             Variables.watcher.EnableRaisingEvents = true;
 
 
-            Logging.TransmitLog("Watcher started...");
+            Logging.TransmitLog("Watcher started...", null);
 
 
         }
@@ -68,7 +68,9 @@ namespace NetCoreCompiler
 
             Variables.fileChanged = e.FullPath;
 
-            if (!Functions.CanBuild())
+            Variables.BuildFile bf = Functions.CanBuild();
+
+            if (bf == null)
                 return;
 
             if (Variables.MainThread != null && Variables.MainThread.ThreadState != System.Threading.ThreadState.Suspended && Variables.MainThread.ThreadState != System.Threading.ThreadState.Stopped)
@@ -84,13 +86,18 @@ namespace NetCoreCompiler
 
                     if (Variables.ProcessThread != null && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Suspended && Variables.ProcessThread.ThreadState != System.Threading.ThreadState.Stopped)
                     {
-                        Logging.TransmitLog("\r\n-----------\r\nBuild restarted!\r\n-----------\r\n\r\n");
                         if (!Variables.buildProcess.HasExited)
                             Variables.buildProcess.Kill();
                         Variables.ProcessThread.Suspend();
+
+                        Variables.currentBuildFile = bf;
+
+                        Logging.TransmitLog("\r\n-----------\r\nBuild restarted!\r\n-----------\r\n\r\n", Variables.currentBuildFile.WebsiteName);
                     } else
                     {
-                        Logging.TransmitLog("\r\n-----------\r\nBuild started!\r\n-----------\r\n\r\n");
+                        Variables.currentBuildFile = bf;
+
+                        Logging.TransmitLog("\r\n-----------\r\nBuild started!\r\n-----------\r\n\r\n", Variables.currentBuildFile.WebsiteName);
                     }
 
                     Functions.TriggerBuild();
@@ -98,7 +105,7 @@ namespace NetCoreCompiler
                 }
                 catch (Exception ex)
                 {
-                    Logging.TransmitLog(ex.Message);
+                    Logging.TransmitLog(ex.Message, Variables.currentBuildFile.WebsiteName);
                 }
             });
 
@@ -120,7 +127,7 @@ namespace NetCoreCompiler
             {
                 Logging.TransmitLog($"Message: {ex.Message}" + "\r\n" +
                     "Stacktrace:" + "\r\n" +
-                    ex.StackTrace + "\r\n");
+                    ex.StackTrace + "\r\n", null);
 
                 PrintException(ex.InnerException);
             }
